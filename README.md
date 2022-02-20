@@ -1,4 +1,22 @@
-# top 10 packages in a Debian repository in terms of most number of files associated with them.
+# top 10 packages in a Debian repository in terms of most number of files associated with them
+
+## dependencies
+
+- requests : ```pip3 install requests```
+- it also uses gzip,tempile,sys but they come with python3 standard library.
+
+## how to execute
+
+```bash
+
+#./package_statistics.py architecture
+./package_statistics.py amd64
+
+#if you have Contents file link then you can use
+#./package_statistics.py architecture Contents_file_link
+./package_statistics.py amd64 http://ftp.uk.debian.org/debian/dists/stable/main/Contents-amd64.gz
+
+```
 
 ## problem statement
 
@@ -14,11 +32,23 @@ Your task is to develop a python command line tool that takes the architecture (
     <package name 10>         <number of files> 
 You can use the following Debian mirror: <http://ftp.uk.debian.org/debian/dists/stable/main/>. Please try to follow Python's best practices in your solution. Hint: there are tools that can help you verify your code is compliant. In-line comments are appreciated.
 
-## my understanding of problem
+## my understanding of the problem
 
-write a python program that takes a command line argument (the architecture),and downloads the "Contents index" file for that architecture.The downloaded file would contain data regarding files and the package they are associated with.Find top 10 most frequent packages, and print top 10 packages and number of files assoicated with those packages in decending order.
+write a python program that takes a command line argument (the architecture),and downloads the "Contents index" file for that architecture.The downloaded file would contain data regarding files and the package they are associated with.Find top 10 most frequent packages, and print top 10 packages and number of files assoicated with those packages in descending order.
 
 # Approach/algorithm/thought process
+
+## intital thoughts
+
+- can be solved by
+  - get file from web
+  - unzip and read it
+  - keep track of all packages and their frequency in the file
+  - get top 10 and print them
+- time complexity:
+  - we have to read each occurence of package from the file,hence the algorithm in worst case would be O(n) (linear time) in terms of computation
+- space complexity:
+  - the file will be in memory and if file size is too big,we can run out of memory.so try to keep only one copy of file in memory at a time and keep modifying that file,instead of copying after processing.
 
 ## preprocessing
 
@@ -60,29 +90,28 @@ bin/btrfs-select-super                                  admin/btrfs-prog
 ...
 ```
 
-## optimizing text size
+### optimizing text size
 
 - since for each file the packages that it is associated with is mentioned on right side. We can get rid of filenames as from package names let alone we can find the frequency,hence we get rid of filenames and keep a list of strings,where each string is a package name.
 
-## get frequency of all packages
+### get frequency of all packages
 
 - take the list contain package names and convert it into a dictionary with key being package name and value is the frequency of it in the list.
 
-## find top 10 most frequent packages and print them
+### find top 10 most frequent packages and print them
 
 - iterating 10 times over the dictioary is O(n) and is not that expensive computationally.
 
 ## other optimization suggestions
 
-- although even after using a single thread,downloading the file over a network is the bottleneck and not the parsing/processing part.
-
-  - eg it takes 20 seconds to download amd64 file and less than 4 seconds to process it and print output.
+- although even after using a single thread,downloading the file over a network is the bottleneck and not the parsing processing part.
+  - eg it takes 20 seconds to download amd64 file and less than 3 seconds to process it and print output.
 
 - but still with multithreading the processing part can be brought down to less than a second for the above example.
 
 - i couldn't find a way to directly read a downloaded compressed data without saving it in a temporary file, however directly unzipping it without storing in a file can optimize memory usage.
 
-- sometimes the file size can get big and during processing we may run out of memory eg when the argument is source ,we can use streaming to avoid running out of memory.And for now there i tried to keep only one copy of data in memory at a time and instead of copying during processing,i would remove from one data structure and process it and then put in another one.
+- sometimes the file size can get big and during processing we may run out of memory eg when the argument is source ,we can use streaming to avoid running out of memory.And for now , i tried to keep only one copy of data in memory at a time and instead of copying during processing,i would remove from one data structure and process it and then put in another one.
 - the program isn't tested thoroughly,so it needs to be tested.
 - although majority of possible exceptions have been handled,it could be done in a more precise way.
 
@@ -91,7 +120,7 @@ bin/btrfs-select-super                                  admin/btrfs-prog
 - it took me about 20 minutes to wrap my head around the problem statement and understand properly what the given problem means.
 - created a dummy solution in around 40 minutes that was working.
 
-- spent around 4 hours(not at once) to make code readable and document the methods,module,class etc and also optimize the code for a single threaded program.
+- spent around 4 hours(not at once) to make code readable and documented the methods,module,class etc and also optimize the code for a single threaded program.
 
 ## code
 
