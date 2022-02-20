@@ -44,9 +44,9 @@ write a python program that takes a command line argument (the architecture),and
   - get file from web
   - unzip and read it
   - keep track of all packages and their frequency in the file
-  - get top 10 and print them
+  - get top 10 most frequent and print them
 - time complexity:
-  - we have to read each occurence of package from the file,hence the algorithm in worst case would be O(n) (linear time) in terms of computation
+  - we have to read each occurence of package from the file,hence the algorithm even in best case would be O(n) (linear time) in terms of computation
 - space complexity:
   - the file will be in memory and if file size is too big,we can run out of memory.so try to keep only one copy of file in memory at a time and keep modifying that file,instead of copying after processing.
 

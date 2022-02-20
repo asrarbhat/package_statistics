@@ -5,6 +5,7 @@ NAME:
     packakage_statistics
 
 DESCRIPTION:
+
     this module provides PackageStatistics class,that can be used to find top K
     packages with most number of files associated in a .deb repository.
     it uses Contents index file of the given repository to do so.
@@ -58,7 +59,7 @@ class PackageStatistics:
     def __init__(self, file_url, top_k=10):
         """
         paremeters:
-            file_url -> str: the url of Content index file.
+            file_url -> str: the url of Contents index file.
             top_k -> int   : the size of output (default 10).
         """
 
