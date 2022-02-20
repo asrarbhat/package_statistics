@@ -17,7 +17,7 @@ CLASSES:
 """
 
 import requests  # to get data from web
-import tempfile  # to create temporary file for storing downloaded data temporarily
+import tempfile  # to create a temporary file for storing downloaded data temporarily
 import gzip  # to unzip the file
 from sys import argv, exit  # to take command line arguments and exit if error occurs
 
@@ -34,20 +34,20 @@ class PackageStatistics:
 
         private attributes:
 
-            __file_url: url of content file.
-            __top_k : the size of output. 
+            __file_url: url of Content index file.
+            __top_k : number of packages to be printed as output. 
             __file : object to store and tranform data.
 
         private methods:
 
             __get_file():
-                get the content file from web
+                get the Content index file from web
 
             __process_file()
                 convert content file into dict with key=package name,value=number of files associated.
 
             __find()
-                find k packages with highest number of files associated.
+                find __top_k packages with highest number of files associated.
 
             __print()
                 print output.
@@ -58,7 +58,7 @@ class PackageStatistics:
     def __init__(self, file_url, top_k=10):
         """
         paremeters:
-            file_url -> str: the url of content file.
+            file_url -> str: the url of Content index file.
             top_k -> int   : the size of output (default 10).
         """
 
@@ -75,7 +75,7 @@ class PackageStatistics:
         self.__print()
 
     def __get_file(self):
-        """ get the Content file of the repository. """
+        """ get the Content index file of the repository. """
 
         try:
             # create a temporary file to store data to be downloaded from web.
@@ -125,7 +125,7 @@ class PackageStatistics:
         # extract package names from a line in file and discard everything else
         def clean_line(line):
             if len(line.strip()) == 0:
-                return "empty_line"
+                return ["empty_line"]
             # tranformation   "filename    pack1,pack2" =>  [pack1,pack2]
             return line.split(" ")[-1].strip().split(",")
 
@@ -185,12 +185,12 @@ class PackageStatistics:
 if __name__ == "__main__":
 
     def validate_command() -> str:
-        """validate the command and return the url of Content file."""
+        """validate the command and return the url of Content index file."""
 
         arguments = argv[1:]
         arguments_length = len(arguments)
 
-        # format of Content file path-> dists/$DIST/$COMP/Contents-$SARCH.gz
+        # format of Content index file path-> dists/$DIST/$COMP/Contents-$SARCH.gz
         file_url_format = "http://ftp.uk.debian.org/debian/dists/stable/main/Contents-<architecture>.gz"
 
         if arguments_length == 1 and arguments[0].strip().lower() != "help":
@@ -198,7 +198,7 @@ if __name__ == "__main__":
                 "<architecture>", arguments[0].strip())
             return file_url
 
-        # take two arguments,where second one is url of Content file
+        # take two arguments,where second one is url of Content index file
         elif arguments_length == 2:
             file_url = arguments[1]
             return file_url
