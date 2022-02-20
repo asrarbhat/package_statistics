@@ -125,7 +125,6 @@ bin/btrfs-select-super                                  admin/btrfs-prog
 ## code
 
 ```python
-
 #!/usr/bin/python3
 
 """
@@ -133,27 +132,27 @@ NAME:
     packakage_statistics
 
 DESCRIPTION:
-    this module provides PackageStatistics class,that can be used to find top k
+    this module provides PackageStatistics class,that can be used to find top K
     packages with most number of files associated in a .deb repository.
-    it uses Content file of a given repository to do so.
+    it uses Contents index file of the given repository to do so.
 
 CLASSES:
     PackageStatistics(content_file_url,top_k)
-        methods:
+        public methods:
             execute(): to print output
     
 """
 
-import requests  # to get data from web
-import tempfile  # to create a temporary file for storing downloaded data temporarily
+import requests  # to get file from web
+import tempfile  # to create a temporary file to store downloaded data temporarily
 import gzip  # to unzip the file
 from sys import argv, exit  # to take command line arguments and exit if error occurs
 
 
 class PackageStatistics:
     '''
-    this class can find top k packages with most number of files
-    associated in a content file of a .deb repository.
+    the objects of this class can find top k packages in a .deb repository with most number of files
+    associated, using the contents file of a .deb repository.
 
         public methods:
 
@@ -162,17 +161,17 @@ class PackageStatistics:
 
         private attributes:
 
-            __file_url: url of Content index file.
+            __file_url: url of Contents index file.
             __top_k : number of packages to be printed as output. 
             __file : object to store and tranform data.
 
         private methods:
 
             __get_file():
-                get the Content index file from web
+                get the Contents index file from web
 
             __process_file()
-                convert content file into dict with key=package name,value=number of files associated.
+                convert Contents file into dict with key=package name,value=number of files associated.
 
             __find()
                 find __top_k packages with highest number of files associated.
@@ -199,11 +198,11 @@ class PackageStatistics:
         # private methods to be called in this order only.
         self.__get_file()
         self.__process_file()
-        self.__find()
+        self.__find_packages()
         self.__print()
 
     def __get_file(self):
-        """ get the Content index file of the repository. """
+        """ get the Contents index file of the repository. """
 
         try:
             # create a temporary file to store data to be downloaded from web.
@@ -215,20 +214,20 @@ class PackageStatistics:
             exit(11)
         try:
             # get file from web
-            content_file = requests.get(self.__file_url)
-            if content_file.status_code != 200:
-                print(content_file.status_code)
+            contents_file = requests.get(self.__file_url)
+            if contents_file.status_code != 200:  # 200 means OK / success
+                print(contents_file.status_code)
                 raise Exception()
-            content_file = content_file.content
+            contents_file = contents_file.content
         except:
             print("[ERROR] unable to get Content file from web!")
             exit(11)
         try:
             # store downloaded content file in a local temporary file
-            temporary_file.write(content_file)
+            temporary_file.write(contents_file)
 
             # to free up space as file is stored in temporary_file
-            del content_file
+            del contents_file
         except:
             print("[ERROR] unable to write to local temporary file!")
             exit(11)
@@ -254,13 +253,14 @@ class PackageStatistics:
         def clean_line(line):
             if len(line.strip()) == 0:
                 return ["empty_line"]
-            # tranformation   "filename    pack1,pack2" =>  [pack1,pack2]
+
+            # tranformation :   "filename    pack1,pack2" =>  ["pack1","pack2"]
             return line.split(" ")[-1].strip().split(",")
 
-        # tranformation : ["filename  pack1,pack2","filename pack3 pack4"....] => [[pack1,pack2],[pack3,pack4]...]
+        # tranformation : ["filename  pack1,pack2","filename pack3 pack4"....] => [["pack1","pack2"],["pack3","pack4"]...]
         self.__file = list(map(clean_line, self.__file))
 
-        # to save memory while transforming data : instead of copying,remove from one and add to another.
+        # to save memory while transforming data : instead of copying,remove from one object and add to another.
 
         temp_data = []
         file_length = len(self.__file)
@@ -276,7 +276,7 @@ class PackageStatistics:
             package = temp_data.pop()
             self.__file[package] = self.__file.get(package, 0)+1
 
-    def __find(self):
+    def __find_packages(self):
         """
         find top k packages with higest number of files associated,
          and store in self.__top_k_packages as list of list.
@@ -313,21 +313,21 @@ class PackageStatistics:
 if __name__ == "__main__":
 
     def validate_command() -> str:
-        """validate the command and return the url of Content index file."""
+        """validate the command and return the url of Contents index file."""
 
         arguments = argv[1:]
-        arguments_length = len(arguments)
+        no_of_arguments = len(arguments)
 
-        # format of Content index file path-> dists/$DIST/$COMP/Contents-$SARCH.gz
+        # format of Contents index file path-> dists/$DIST/$COMP/Contents-$SARCH.gz
         file_url_format = "http://ftp.uk.debian.org/debian/dists/stable/main/Contents-<architecture>.gz"
 
-        if arguments_length == 1 and arguments[0].strip().lower() != "help":
+        if no_of_arguments == 1 and arguments[0].strip().lower() != "help":
             file_url = file_url_format.replace(
                 "<architecture>", arguments[0].strip())
             return file_url
 
         # take two arguments,where second one is url of Content index file
-        elif arguments_length == 2:
+        elif no_of_arguments == 2:
             file_url = arguments[1]
             return file_url
 
@@ -350,5 +350,6 @@ if __name__ == "__main__":
     file_url = validate_command()
     job = PackageStatistics(file_url, top_k=10)
     job.execute()
+
 
 ```
