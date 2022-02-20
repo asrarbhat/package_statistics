@@ -1,4 +1,4 @@
-# top 10 debian packages that have most number of files associated
+# top 10 debian packages that have most number of files associated with them
 
 ## problem statement
 
