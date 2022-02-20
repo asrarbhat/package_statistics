@@ -1,4 +1,4 @@
-# top 10 debian packages in a repository that have most number of files associated with them
+# top 10 packages in a Debian repository in terms of most number of files associated with them.
 
 ## problem statement
 
@@ -16,7 +16,7 @@ You can use the following Debian mirror: <http://ftp.uk.debian.org/debian/dists/
 
 ## my understanding of problem
 
-write a python program that takes a command line argument(the architecture),and download Contents index file for thattop architecture and that file contains data regarding files and the package they are associated with. find top 10 most frequent packages, and print output containing top 10 packages and number of files assoicated with that packages in decending order.
+write a python program that takes a command line argument (the architecture),and downloads the "Contents index" file for that architecture.The downloaded file would contain data regarding files and the package they are associated with.Find top 10 most frequent packages, and print top 10 packages and number of files assoicated with those packages in decending order.
 
 # Approach/algorithm/thought process
 
