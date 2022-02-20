@@ -22,19 +22,20 @@ write a python program that takes a command line argument (the architecture),and
 
 ## preprocessing
 
-1. to make usage convenient,the whole program should be just one file.
-1. verify the command entered
+1. to make usage convenient,the whole program should be just one file instead of multiple modules.
+1. verify the command line argument entered.
     - appropriate number of arguments given.
     - arguments are valid.
     - if error occurs,terminate gracefully with error message as specific as possible.
-1. get the file from web
-    - use requests module to send HTTP get request.
-    - if error while getting the file from web,terminate gracefully,showing error code as output.
-1. store the file in temporary file
+1. download the file from web
+    - use "requests" module to send HTTP get request.
+    - if error occurs while getting the file from web,terminate gracefully,showing error code and error message as output.
+1. store the downloaded file in a temporary file
     - since the file is compressed,to decompress it we would need whole file at once.
-    - use tempfile module to create a temporary file which is removed automatically once program terminates.
+    - use "tempfile" module to create a temporary file which is removed automatically once program terminates.
+    - store downloaded file in temporary file.
 1. unzip the file
-    - use gzip module to unzip file into the temporary file created.
+    - use "gzip" module to unzip file.
 1. read the text in file
     - read the text in file for processing stage.
 
@@ -56,6 +57,7 @@ bin/btrfs-find-root                                     admin/btrfs-progs
 bin/btrfs-image                                         admin/btrfs-progs
 bin/btrfs-map-logical                                   admin/btrfs-progs
 bin/btrfs-select-super                                  admin/btrfs-prog
+...
 ```
 
 ## optimizing text size
@@ -64,27 +66,29 @@ bin/btrfs-select-super                                  admin/btrfs-prog
 
 ## get frequency of all packages
 
-- take the list contain package names and convert it into a dictionary with key being package name and value is the frequency of it in list.
+- take the list contain package names and convert it into a dictionary with key being package name and value is the frequency of it in the list.
 
-## find top 10 most frequent pakcages and print them
+## find top 10 most frequent packages and print them
 
 - iterating 10 times over the dictioary is O(n) and is not that expensive computationally.
 
 ## other optimization suggestions
 
-- although even with single thread downloading the file over a network is the bottleneck and not the parsing part.
+- although even after using a single thread,downloading the file over a network is the bottleneck and not the parsing/processing part.
 
-  - eg it takes 20 seconds to download amd64 file and less than 3 seconds to process it and print output.
+  - eg it takes 20 seconds to download amd64 file and less than 4 seconds to process it and print output.
 
 - but still with multithreading the processing part can be brought down to less than a second for the above example.
 
-- i couldn't find a way to directly read a downloaded compressed data without saving it in a temporary file, however directly unzipping it without storing in a file increase memory usage.
+- i couldn't find a way to directly read a downloaded compressed data without saving it in a temporary file, however directly unzipping it without storing in a file can optimize memory usage.
 
-- sometimes the file can get big eg when the argument is source ,we can use streaming to avoid running out of memory.
+- sometimes the file size can get big and during processing we may run out of memory eg when the argument is source ,we can use streaming to avoid running out of memory.And for now there i tried to keep only one copy of data in memory at a time and instead of copying during processing,i would remove from one data structure and process it and then put in another one.
+- the program isn't tested thoroughly,so it needs to be tested.
+- although majority of possible exceptions have been handled,it could be done in a more precise way.
 
 ## timeline
 
-- took me 20 minutes to wrap my head around the problem statement and understnad properly,what the given problem means.
+- it took me about 20 minutes to wrap my head around the problem statement and understand properly what the given problem means.
 - created a dummy solution in around 40 minutes that was working.
 
 - spent around 4 hours(not at once) to make code readable and document the methods,module,class etc and also optimize the code for a single threaded program.
@@ -112,7 +116,7 @@ CLASSES:
 """
 
 import requests  # to get data from web
-import tempfile  # to create temporary file for storing downloaded data temporarily
+import tempfile  # to create a temporary file for storing downloaded data temporarily
 import gzip  # to unzip the file
 from sys import argv, exit  # to take command line arguments and exit if error occurs
 
@@ -129,20 +133,20 @@ class PackageStatistics:
 
         private attributes:
 
-            __file_url: url of content file.
-            __top_k : the size of output. 
+            __file_url: url of Content index file.
+            __top_k : number of packages to be printed as output. 
             __file : object to store and tranform data.
 
         private methods:
 
             __get_file():
-                get the content file from web
+                get the Content index file from web
 
             __process_file()
                 convert content file into dict with key=package name,value=number of files associated.
 
             __find()
-                find k packages with highest number of files associated.
+                find __top_k packages with highest number of files associated.
 
             __print()
                 print output.
@@ -153,7 +157,7 @@ class PackageStatistics:
     def __init__(self, file_url, top_k=10):
         """
         paremeters:
-            file_url -> str: the url of content file.
+            file_url -> str: the url of Content index file.
             top_k -> int   : the size of output (default 10).
         """
 
@@ -170,7 +174,7 @@ class PackageStatistics:
         self.__print()
 
     def __get_file(self):
-        """ get the Content file of the repository. """
+        """ get the Content index file of the repository. """
 
         try:
             # create a temporary file to store data to be downloaded from web.
@@ -220,7 +224,7 @@ class PackageStatistics:
         # extract package names from a line in file and discard everything else
         def clean_line(line):
             if len(line.strip()) == 0:
-                return "empty_line"
+                return ["empty_line"]
             # tranformation   "filename    pack1,pack2" =>  [pack1,pack2]
             return line.split(" ")[-1].strip().split(",")
 
@@ -280,12 +284,12 @@ class PackageStatistics:
 if __name__ == "__main__":
 
     def validate_command() -> str:
-        """validate the command and return the url of Content file."""
+        """validate the command and return the url of Content index file."""
 
         arguments = argv[1:]
         arguments_length = len(arguments)
 
-        # format of Content file path-> dists/$DIST/$COMP/Contents-$SARCH.gz
+        # format of Content index file path-> dists/$DIST/$COMP/Contents-$SARCH.gz
         file_url_format = "http://ftp.uk.debian.org/debian/dists/stable/main/Contents-<architecture>.gz"
 
         if arguments_length == 1 and arguments[0].strip().lower() != "help":
@@ -293,7 +297,7 @@ if __name__ == "__main__":
                 "<architecture>", arguments[0].strip())
             return file_url
 
-        # take two arguments,where second one is url of Content file
+        # take two arguments,where second one is url of Content index file
         elif arguments_length == 2:
             file_url = arguments[1]
             return file_url
