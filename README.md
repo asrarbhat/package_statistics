@@ -129,7 +129,7 @@ bin/btrfs-select-super                                  admin/btrfs-prog
 
 """
 NAME:
-    packakage_statistics
+    package_statistics
 
 DESCRIPTION:
     this module provides PackageStatistics class,that can be used to find top K
