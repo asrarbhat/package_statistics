@@ -2,7 +2,7 @@
 
 """
 NAME:
-    packakage_statistics
+    package_statistics
 
 DESCRIPTION:
 
